@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Notes collection rules
+    match /notes/{noteId} {
+      allow read: if resource.data.visibility == 'public' 
+                  || request.auth != null && (resource.data.userId == request.auth.uid 
+                  || resource.data.visibility == 'public');
+      
+      allow create: if request.auth != null 
+                   && request.auth.uid == request.resource.data.userId
+                   && request.resource.data.courseGroup in ['lecture', 'tutorial', 'lab', 'assignment', 'exam', 'other']
+                   && request.resource.data.visibility in ['public', 'private'];
+      
+      allow update: if request.auth != null 
+                   && resource.data.userId == request.auth.uid
+                   && request.resource.data.courseGroup in ['lecture', 'tutorial', 'lab', 'assignment', 'exam', 'other']
+                   && request.resource.data.visibility in ['public', 'private']
+                   // Only allow updates to specific fields
+                   && request.resource.data.keys().hasAll([
+                         'title', 'content', 'courseGroup', 
+                         'visibility', 'updatedAt'
+                     ]);
+      
+      allow delete: if request.auth != null 
+                   && resource.data.userId == request.auth.uid
+                   // Instead of delete, we'll handle soft delete in app logic
+                   && false; // Prevent direct deletes
+    }
+
+    // Bin collection for soft deleted notes
+    match /bin/{binId} {
+      allow read: if request.auth != null 
+                 && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+                   && request.auth.uid == request.resource.data.userId;
+      
+      allow update: if request.auth != null 
+                   && resource.data.userId == request.auth.uid;
+      
+      allow delete: if request.auth != null 
+                   && resource.data.userId == request.auth.uid;
+    }
+  }
+}
