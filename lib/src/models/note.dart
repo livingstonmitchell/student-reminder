@@ -5,6 +5,7 @@ class Note {
   final String visibility; // 'public' | 'private'
   final DateTime? dueDate;
   final DateTime? aud_dt;
+  final String tags;
 
   Note({
     required this.id,
@@ -13,6 +14,7 @@ class Note {
     required this.visibility,
     this.dueDate,
     this.aud_dt,
+    required this.tags,
   });
 
   // From Firebase
@@ -21,11 +23,13 @@ class Note {
   //    Note.fromMap(doc.id, doc.data());
   factory Note.fromMap(String id, Map<String, dynamic> data) {
     return Note(
+
       id: id,
       title: data['title'] ?? '',
       body: data['body'] ?? '',
       visibility: data['visibility'] ?? '',
       dueDate: (data['dueDate']?.toDate()) as DateTime?,
+      tags: data['tags'] ?? '',
       aud_dt: (data['aud_dt']?.toDate()) as DateTime?,
     );
   }
@@ -36,5 +40,6 @@ class Note {
     'visibility': visibility,
     'dueDate': dueDate,
     'aud_dt': aud_dt,
+    'tags': tags,
   };
 }

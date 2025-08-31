@@ -160,7 +160,7 @@ class _MyNotesPageState extends State<MyNotesPage> {
           // Notes List
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: NotesService.instance.watchMyNotes(uid),
+              stream: NotesService.instance.watchMyNotesSnapshot(uid),
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -281,132 +281,175 @@ class _MyNotesPageState extends State<MyNotesPage> {
 
                     return Card(
                       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    title,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                      child: InkWell(
+                        onTap: () async {
+                          await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) => NoteEditorDialog(
+                              uid: uid,
+                              noteId: data.id,
+                              existing: data.data(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      title,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Chip(
-                                  label: Text(
-                                    visible,
-                                    style: TextStyle(fontSize: 11),
+                                  Chip(
+                                    label: Text(
+                                      visible,
+                                      style: TextStyle(fontSize: 11),
+                                    ),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                SizedBox(width: 8),
-                                IconButton(
-                                  onPressed: () async {
-                                    await NotesService.instance.deleteNote(
-                                      uid,
-                                      data.id,
-                                    );
-                                  },
-                                  icon: Icon(Icons.delete_outlined),
-                                  iconSize: 20,
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              body,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                            // Always show tag section for debugging
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Text(
-                                  'Tags: ',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[500],
-                                    fontWeight: FontWeight.bold,
+                                  SizedBox(width: 8),
+                                  IconButton(
+                                    onPressed: () async {
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (_) => NoteEditorDialog(
+                                          uid: uid,
+                                          noteId: data.id,
+                                          existing: data.data(),
+                                        ),
+                                      );
+                                    },
+                                    icon: Icon(Icons.edit_outlined),
+                                    iconSize: 20,
                                   ),
-                                ),
-                                if (tags.isEmpty)
+                                  IconButton(
+                                    onPressed: () async {
+                                      // Show confirmation dialog
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Text('Delete Note'),
+                                          content: Text(
+                                            'Are you sure you want to delete "$title"? It will be moved to the bin.',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, false),
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, true),
+                                              child: Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirmed == true) {
+                                        await NotesService.instance
+                                            .softDeleteNote(uid, data.id);
+
+                                        // Show snackbar with undo option
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Note moved to bin',
+                                              ),
+                                              action: SnackBarAction(
+                                                label: 'Undo',
+                                                onPressed: () async {
+                                                  await NotesService.instance
+                                                      .restoreNote(
+                                                        uid,
+                                                        data.id,
+                                                      );
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    icon: Icon(Icons.delete_outlined),
+                                    iconSize: 20,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                body,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                              // Always show tag section for debugging
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
                                   Text(
-                                    '(none)',
+                                    'Tags: ',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.grey[400],
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  )
-                                else
-                                  Expanded(
-                                    child: Wrap(
-                                      spacing: 4,
-                                      runSpacing: 2,
-                                      children: tags
-                                          .map(
-                                            (tag) => Chip(
-                                              label: Text(
-                                                tag,
-                                                style: TextStyle(fontSize: 10),
-                                              ),
-                                              backgroundColor: Colors.blue[50],
-                                              materialTapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                            ),
-                                          )
-                                          .toList(),
+                                      color: Colors.grey[500],
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                              ],
-                            ),
-                            SizedBox(height: 4),
-                            InkWell(
-                              onTap: () async {
-                                await showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) => NoteEditorDialog(
-                                    uid: uid,
-                                    noteId: data.id,
-                                    existing: data.data(),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.edit,
-                                      size: 16,
-                                      color: Colors.blue,
-                                    ),
-                                    SizedBox(width: 4),
+                                  if (tags.isEmpty)
                                     Text(
-                                      'Edit',
-                                      style: TextStyle(color: Colors.blue),
+                                      '(none)',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey[400],
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    )
+                                  else
+                                    Expanded(
+                                      child: Wrap(
+                                        spacing: 4,
+                                        runSpacing: 2,
+                                        children: tags
+                                            .map(
+                                              (tag) => Chip(
+                                                label: Text(
+                                                  tag,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                                backgroundColor:
+                                                    Colors.blue[50],
+                                                materialTapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
                                     ),
-                                  ],
-                                ),
+                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -495,7 +538,7 @@ class _MyNotesPageState extends State<MyNotesPage> {
 
                 // Tags Filter
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: NotesService.instance.watchMyNotes(
+                  stream: NotesService.instance.watchMyNotesSnapshot(
                     AuthService.instance.currentUser!.uid,
                   ),
                   builder: (context, snapshot) {

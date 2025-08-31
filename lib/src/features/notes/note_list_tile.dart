@@ -49,13 +49,13 @@ class NoteListTile extends StatelessWidget {
       try {
         final userId = AuthService.instance.currentUser!.uid;
         await NotesService.instance.softDeleteNote(userId, noteId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Note moved to bin')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Note moved to bin')));
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting note: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error deleting note: $e')));
       }
     }
   }

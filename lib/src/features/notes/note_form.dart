@@ -36,17 +36,15 @@ class _NoteFormState extends State<NoteForm> {
           body: _bodyController.text,
           visibility: _selectedVisibility.name,
           aud_dt: DateTime.now(),
-          tags: [
-            _selectedCourseGroup.name
-          ], // Optionally use tags for course group
+          tags: _selectedCourseGroup.name,
         );
 
         await _noteService.createNoteModel(userId, note);
         Navigator.pop(context);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving note: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving note: $e')));
       }
     }
   }
@@ -64,14 +62,16 @@ class _NoteFormState extends State<NoteForm> {
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(labelText: 'Title'),
-                validator: (v) => v == null || v.isEmpty ? "Enter a title" : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? "Enter a title" : null,
               ),
               SizedBox(height: 12),
               TextFormField(
                 controller: _bodyController,
                 decoration: InputDecoration(labelText: 'Content'),
                 maxLines: 5,
-                validator: (v) => v == null || v.isEmpty ? "Enter content" : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? "Enter content" : null,
               ),
               SizedBox(height: 12),
               DropdownButtonFormField<CourseGroup>(
@@ -102,10 +102,7 @@ class _NoteFormState extends State<NoteForm> {
                 decoration: InputDecoration(labelText: 'Visibility'),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveNote,
-                child: Text('Save Note'),
-              ),
+              ElevatedButton(onPressed: _saveNote, child: Text('Save Note')),
             ],
           ),
         ),

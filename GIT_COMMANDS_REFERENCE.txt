@@ -1,0 +1,449 @@
+GIT COMMANDS REFERENCE GUIDE
+============================
+
+This document provides a comprehensive reference of Git commands used in the 
+Student Reminder App project, including their purposes and practical examples.
+
+Last Updated: August 31, 2025
+
+TABLE OF CONTENTS
+=================
+1. Basic Git Commands
+2. Branch Management
+3. Remote Repository Management
+4. Merge and Conflict Resolution
+5. Status and Information Commands
+6. Advanced Git Operations
+7. Project-Specific Commands Used
+
+=======================
+1. BASIC GIT COMMANDS
+=======================
+
+git init
+--------
+Purpose: Initialize a new Git repository in the current directory
+Example: git init
+Usage: Creates a new .git folder and starts version control
+
+git clone <repository-url>
+--------------------------
+Purpose: Create a local copy of a remote repository
+Example: git clone https://github.com/username/repository.git
+Usage: Downloads entire repository history to local machine
+
+git add <file>
+--------------
+Purpose: Stage changes for the next commit
+Examples:
+  git add .                    # Stage all changes
+  git add README.md           # Stage specific file
+  git add lib/src/           # Stage specific directory
+Usage: Prepares files to be included in the next commit
+
+git commit -m "message"
+-----------------------
+Purpose: Create a snapshot of staged changes with a descriptive message
+Examples:
+  git commit -m "Add LiveCharCounterTextField widget"
+  git commit -m "Fix merge conflicts in profile page"
+Usage: Saves changes to the repository history
+
+git push <remote> <branch>
+--------------------------
+Purpose: Upload local commits to a remote repository
+Examples:
+  git push origin main                    # Push to main branch
+  git push origin livingston-to-merge    # Push to specific branch
+  git push new-origin livingston         # Push to different remote
+Usage: Synchronizes local changes with remote repository
+
+git pull <remote> <branch>
+--------------------------
+Purpose: Download and merge changes from remote repository
+Examples:
+  git pull origin main
+  git pull new-origin livingston
+Usage: Updates local repository with remote changes
+
+git fetch <remote>
+------------------
+Purpose: Download changes from remote without merging
+Example: git fetch origin
+Usage: Updates remote tracking branches without affecting working directory
+
+===========================
+2. BRANCH MANAGEMENT
+===========================
+
+git branch
+----------
+Purpose: List all local branches
+Example: git branch
+Usage: Shows all branches with asterisk (*) marking current branch
+
+git branch -a
+-------------
+Purpose: List all branches (local and remote)
+Example: git branch -a
+Usage: Shows complete branch structure including remote branches
+
+git branch -v
+-------------
+Purpose: List branches with their latest commit information
+Example: git branch -v
+Output: Shows commit hash and message for each branch
+
+git checkout <branch>
+---------------------
+Purpose: Switch to a different branch
+Examples:
+  git checkout main
+  git checkout livingston-to-merge
+Usage: Changes working directory to specified branch
+
+git checkout -b <new-branch>
+----------------------------
+Purpose: Create and switch to a new branch
+Examples:
+  git checkout -b feature-branch
+  git checkout -b livingston
+Usage: Creates new branch from current branch and switches to it
+
+git branch <branch-name>
+------------------------
+Purpose: Create a new branch without switching to it
+Example: git branch feature-new
+Usage: Creates branch but stays on current branch
+
+git branch -d <branch-name>
+---------------------------
+Purpose: Delete a local branch (safe delete)
+Example: git branch -d old-feature
+Usage: Deletes branch only if it's been merged
+
+git branch -D <branch-name>
+---------------------------
+Purpose: Force delete a local branch
+Example: git branch -D unfinished-feature
+Usage: Deletes branch regardless of merge status
+
+=====================================
+3. REMOTE REPOSITORY MANAGEMENT
+=====================================
+
+git remote -v
+-------------
+Purpose: List all configured remote repositories
+Example: git remote -v
+Output: Shows remote names with their URLs (fetch/push)
+
+git remote add <name> <url>
+---------------------------
+Purpose: Add a new remote repository
+Examples:
+  git remote add origin https://github.com/username/repo.git
+  git remote add new-origin https://github.com/0310-Tw/student_reminder.git
+Usage: Connects local repository to remote repositories
+
+git remote remove <name>
+------------------------
+Purpose: Remove a remote repository connection
+Example: git remote remove old-origin
+Usage: Disconnects local repository from specified remote
+
+git remote rename <old-name> <new-name>
+---------------------------------------
+Purpose: Rename a remote repository connection
+Example: git remote rename upstream origin
+Usage: Changes the reference name for a remote repository
+
+git remote show <remote-name>
+-----------------------------
+Purpose: Display detailed information about a remote
+Example: git remote show origin
+Output: Shows branches, URLs, and tracking information
+
+========================================
+4. MERGE AND CONFLICT RESOLUTION
+========================================
+
+git merge <branch>
+------------------
+Purpose: Combine changes from another branch into current branch
+Examples:
+  git merge feature-branch
+  git merge willow-branch-to-merge
+Usage: Integrates changes from specified branch
+
+git merge <branch> --allow-unrelated-histories
+----------------------------------------------
+Purpose: Merge branches with completely different histories
+Example: git merge willow-branch-to-merge --allow-unrelated-histories
+Usage: Forces merge when branches don't share common ancestry
+
+git merge --abort
+-----------------
+Purpose: Cancel an in-progress merge
+Example: git merge --abort
+Usage: Returns repository to state before merge attempt
+
+git checkout --ours <file>
+--------------------------
+Purpose: Resolve conflict by keeping current branch version
+Examples:
+  git checkout --ours README.md
+  git checkout --ours lib/src/services/note_service.dart
+Usage: Accepts "our" version during merge conflicts
+
+git checkout --theirs <file>
+----------------------------
+Purpose: Resolve conflict by keeping incoming branch version
+Example: git checkout --theirs conflicted-file.dart
+Usage: Accepts "their" version during merge conflicts
+
+================================
+5. STATUS AND INFORMATION COMMANDS
+================================
+
+git status
+----------
+Purpose: Show current repository status
+Example: git status
+Output: Displays modified files, staged changes, branch info
+
+git status --short
+------------------
+Purpose: Show compact status information
+Example: git status --short
+Output: Brief status with file markers (M=modified, A=added, etc.)
+
+git status --porcelain
+----------------------
+Purpose: Show machine-readable status format
+Example: git status --porcelain
+Usage: Useful for scripts and automated processes
+
+git log
+-------
+Purpose: Display commit history
+Example: git log
+Output: Shows full commit history with details
+
+git log --oneline
+-----------------
+Purpose: Show condensed commit history
+Examples:
+  git log --oneline
+  git log --oneline -5        # Show last 5 commits
+Output: One line per commit with hash and message
+
+git log --oneline <branch>
+--------------------------
+Purpose: Show commit history for specific branch
+Example: git log --oneline livingston-to-merge
+Usage: Displays commits for specified branch
+
+git diff
+--------
+Purpose: Show changes between working directory and staging
+Example: git diff
+Usage: Displays unstaged changes
+
+git diff <file>
+---------------
+Purpose: Show changes in a specific file
+Example: git diff lib/src/shared/widgets/live_char_counter_text_field.dart
+Usage: Shows modifications in specified file
+
+git diff --name-only <branch1> <branch2>
+----------------------------------------
+Purpose: List files that differ between branches
+Example: git diff --name-only livingston-to-merge willow-branch-to-merge
+Usage: Shows which files are different without content details
+
+===================================
+6. ADVANCED GIT OPERATIONS
+===================================
+
+git stash
+---------
+Purpose: Temporarily save uncommitted changes
+Example: git stash
+Usage: Stores changes without committing, cleans working directory
+
+git stash pop
+-------------
+Purpose: Apply most recent stashed changes
+Example: git stash pop
+Usage: Restores stashed changes and removes from stash list
+
+git reset --hard
+----------------
+Purpose: Reset working directory to last commit (DESTRUCTIVE)
+Example: git reset --hard
+Usage: Discards all uncommitted changes
+
+git reset --soft HEAD~1
+-----------------------
+Purpose: Undo last commit but keep changes staged
+Example: git reset --soft HEAD~1
+Usage: Moves back one commit, preserves changes
+
+git rebase <branch>
+-------------------
+Purpose: Replay commits from current branch onto another branch
+Example: git rebase main
+Usage: Creates linear history by moving commits
+
+git cherry-pick <commit-hash>
+-----------------------------
+Purpose: Apply specific commit to current branch
+Example: git cherry-pick a1b2c3d
+Usage: Copies single commit from another branch
+
+========================================
+7. PROJECT-SPECIFIC COMMANDS USED
+========================================
+
+Commands Used in Student Reminder App Development:
+
+Initial Setup:
+--------------
+git remote add new-origin https://github.com/0310-Tw/student_reminder.git
+git checkout -b livingston
+git push new-origin livingston
+
+Branch Management:
+------------------
+git checkout -b livingston-to-merge
+git checkout -b willow-branch-to-merge
+git branch -a
+
+Merge Operations:
+-----------------
+git merge willow-branch-to-merge --allow-unrelated-histories
+
+Conflict Resolution:
+-------------------
+git checkout --ours README.md
+git checkout --ours pubspec.yaml
+git checkout --ours lib/src/shared/main_layout.dart
+git checkout --ours lib/src/features/notes/dialogs/note_editor_dialog.dart
+git checkout --ours lib/src/services/note_service.dart
+git checkout --ours lib/src/services/user_service.dart
+git checkout --ours lib/src/features/profile/profile_page.dart
+git checkout --ours lib/src/features/profile/student_profile_page.dart
+git checkout --ours lib/src/features/notes/my_notes_page.dart
+git checkout --ours android/app/src/main/AndroidManifest.xml
+
+Repository Switching:
+---------------------
+git remote remove origin
+git remote rename upstream origin
+git fetch origin
+
+Final Commit:
+-------------
+git add .
+git commit -m "Merge willow-branch-to-merge into livingston-to-merge
+
+- Resolved all merge conflicts by keeping livingston-to-merge versions
+- Added new features from willow-branch:
+  * bin_screen.dart (trash/recycle bin feature)
+  * note_form.dart (enhanced note form)
+  * note_list_tile.dart (improved note list display)
+  * Windows platform support files
+  * Firebase configuration updates
+  * Test files and additional platform support
+- Maintained all existing LiveCharCounterTextField and profile features
+- Preserved all recent updates and improvements"
+
+=====================
+COMMON WORKFLOWS
+=====================
+
+Creating New Feature:
+1. git checkout main
+2. git pull origin main
+3. git checkout -b feature-name
+4. [Make changes]
+5. git add .
+6. git commit -m "Add new feature"
+7. git push origin feature-name
+
+Switching Repositories:
+1. git remote -v  (check current remotes)
+2. git remote add new-remote <url>
+3. git fetch new-remote
+4. git checkout -b new-branch
+5. git push new-remote new-branch
+
+Resolving Merge Conflicts:
+1. git merge branch-name
+2. [Conflicts occur]
+3. git checkout --ours file.ext  (or --theirs)
+4. git add .
+5. git commit -m "Resolve merge conflicts"
+
+===================
+TROUBLESHOOTING
+===================
+
+Problem: "fatal: refusing to merge unrelated histories"
+Solution: git merge branch-name --allow-unrelated-histories
+
+Problem: Merge conflicts in multiple files
+Solution: Use git checkout --ours or --theirs for bulk resolution
+
+Problem: Want to undo last commit
+Solution: git reset --soft HEAD~1 (keeps changes) or git reset --hard HEAD~1 (discards)
+
+Problem: Need to switch remotes
+Solution: git remote remove old-name && git remote add new-name <url>
+
+Problem: Branch ahead of origin
+Solution: git push origin branch-name to sync
+
+=============
+BEST PRACTICES
+=============
+
+1. Always check git status before major operations
+2. Use descriptive commit messages
+3. Pull before pushing to avoid conflicts
+4. Use branches for features, keep main/master stable
+5. Backup important changes before force operations
+6. Use --dry-run flag when available for testing
+7. Keep commits focused and atomic
+8. Use git log to understand project history
+
+===============================
+FILE STATUS INDICATORS
+===============================
+
+git status output meanings:
+- M = Modified
+- A = Added (new file)
+- D = Deleted
+- R = Renamed
+- C = Copied
+- U = Unmerged (conflict)
+- ?? = Untracked
+- AA = Both added (merge conflict resolved)
+
+====================================
+END OF GIT COMMANDS REFERENCE
+====================================
+
+This reference covers all Git commands used in the Student Reminder App project
+and provides a comprehensive guide for future development and collaboration.
+
+For more detailed information, use:
+git --help
+git <command> --help
+
+Repository: Student Reminder App
+Project: Flutter Mobile/Web Application
+Maintainer: Development Team
+Version: 1.0 - Complete Git Reference
